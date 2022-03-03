@@ -124,7 +124,7 @@ def _interleave_map_style_datasets(
 
     # Let's now build the indices to pass to .select()
     # Here we create the length that will be sampled from each dataset based on its probability
-    lengths = [len(dset)*probabilities[i] for i,dset in enumerate(datasets)]
+    lengths = [len(dset) for dset in datasets]
     offsets = np.cumsum([0] + lengths[:-1])
     if probabilities is None:
         # Example: If lengths of the datasets are [3, 4, 5]
