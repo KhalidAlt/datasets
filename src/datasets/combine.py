@@ -123,7 +123,8 @@ def _interleave_map_style_datasets(
     concatenated_datasets = concatenate_datasets(datasets, info=info, split=split)
 
     # Let's now build the indices to pass to .select()
-    lengths = [len(dset) for dset in datasets]
+    # Here we create the length that will be sampled from each dataset based on its probability
+    lengths = [len(dset)*probabilities[i] for i,dset in enumerate(datasets)]
     offsets = np.cumsum([0] + lengths[:-1])
     if probabilities is None:
         # Example: If lengths of the datasets are [3, 4, 5]
@@ -139,11 +140,18 @@ def _interleave_map_style_datasets(
                 yield from (int(i) for i in rng.choice(len(datasets), size=1000, p=probabilities))
 
         current_index = [0] * len(datasets)
+        runout = []
         indices = []
         for source_idx in iter_random_indices():
-            # we ran out of examples, let's stop
+            # we ran out of examples from one of the datasets so we add the source_idx to the runout list
+            # we keep doing it until we run out of examples from all the datasets
             if current_index[source_idx] >= lengths[source_idx]:
-                break
+                if source_idx not in runout:
+                    runout.append(source_idx)
+                elif len(runout) == len(probabilities):
+                    break
+                else:
+                    continue
             # let's add the example at the current index of the `source_idx`-th dataset
             indices.append(current_index[source_idx] + offsets[source_idx])
             current_index[source_idx] += 1
