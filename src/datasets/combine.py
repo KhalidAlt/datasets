@@ -148,10 +148,12 @@ def _interleave_map_style_datasets(
             if current_index[source_idx] >= lengths[source_idx]:
                 if source_idx not in runout:
                     runout.append(source_idx)
-                    current_index[source_idx]=0
-            
+                
+                current_index[source_idx]=0
+
             if len(runout)==len(probabilities):
                 break
+
 
             # let's add the example at the current index of the `source_idx`-th dataset
             indices.append(current_index[source_idx] + offsets[source_idx])
